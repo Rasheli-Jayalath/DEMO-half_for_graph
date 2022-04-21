@@ -1,0 +1,663 @@
+<?php 
+include_once("config/config.php");
+include_once("rs_lang.admin.php");
+$objSDb  		= new Database();
+$objCommon 		= new Common();
+$objAdminUser 	= new AdminUser();
+$objDb  		= new ProjectSetup();
+$objPD  		= new ProjectSetup();
+$objDbc  		= new ProjectSetup();
+$objDdb  		= new ProjectSetup();
+$objNews 		= new News();
+ if($objAdminUser->ne_is_login != true){
+	 header("Location:pages/user-access-manage/signin.php");
+  }
+ $objPD->getProject();
+  $PCount=$objPD->totalRecords();
+  
+  if($PCount==1)
+  {
+	   while ($prows = $objPD->dbFetchArray()) {
+	  $pid 						= $prows['pid'];
+	  $pcode 					= $prows['pcode'];
+	 // $pname	 				= $prows['pname'];
+	  $pdetail					= $prows['pdetail'];
+	  $ptype					= $prows['ptype'];
+	  $pstart 					= $prows['pstart'];
+	  $pend 					= $prows['pend'];
+	  $client					= $prows['client'];
+	  $funding_agency			= $prows['funding_agency'];
+	  $contractor				= $prows['contractor'];
+	  $pcost					= $prows['pcost'];
+	  $ssector_id				= $prows['sector_id'];
+	  if($ssector_id!=0)
+	  {
+		 $objDb->setProperty("sector_id",$ssector_id);
+		 $objDb->getSector();
+		 $secrows = $objDb->dbFetchArray();
+		 $sector_name = $secrows['sector_name'];
+			
+	  }
+	  $scountry_id				= $prows['country_id'];
+	  if($scountry_id!=0)
+	  {
+		  $objDb->setProperty("country_id",$scountry_id);
+		  $objDb->getCountry();
+		   $crows = $objDb->dbFetchArray();
+		  $country_name = $crows['country_name'];
+	  }
+	  $consultant				=$prows['consultant'];
+	  $location				    =$prows['location'];
+	  $smec_code				=$prows['smec_code'];
+	}
+	$objDbc->getCurrency();
+				 $cur_rows=$objDbc->dbFetchArray();
+				  $pcid 					= $cur_rows['pcid'];
+			    $cur_1_rate 					= $cur_rows['cur_1_rate'];
+			    $cur_2_rate 					= $cur_rows['cur_2_rate'];
+				$cur_3_rate 					= $cur_rows['cur_3_rate'];
+			    $cur_1 					= $cur_rows['cur_1'];
+			    $cur_2 					= $cur_rows['cur_2'];
+				$cur_3 					= $cur_rows['cur_3'];
+			    $base_cur 				= $cur_rows['base_cur'];
+  } ?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>PMIS</title>
+  <!-- plugins:css -->
+  <link rel="stylesheet" href="vendors/feather/feather.css">
+  <link rel="stylesheet" href="vendors/mdi/css/materialdesignicons.min.css">
+  <link rel="stylesheet" href="vendors/ti-icons/css/themify-icons.css">
+  <link rel="stylesheet" href="vendors/typicons/typicons.css">
+  <link rel="stylesheet" href="vendors/simple-line-icons/css/simple-line-icons.css">
+  <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+  <!-- endinject -->
+  <!-- Plugin css for this page -->
+  <link rel="stylesheet" href="vendors/datatables.net-bs4/dataTables.bootstrap4.css">
+  <link rel="stylesheet" href="js/select.dataTables.min.css">
+  <!-- End plugin css for this page -->
+  <!-- inject:css -->
+  <link rel="stylesheet" href="css/vertical-layout-light/style.css">
+  <link rel="stylesheet" href="css/basic-styles.css">
+ <!-- endinject -->
+  <link rel="shortcut icon" href="images/favicon.png" />
+</head>
+<body>
+  <div class="container-scroller"> 
+    
+    <!-- partial:partials/_navbar.html -->
+    <div id="partials-navbar"></div>
+    <!-- partial -->
+
+    <div class="container-fluid page-body-wrapper" id="pagebodywraper">
+
+      <!-- partial:partials/_settings-panel.html -->
+      <div id="partials-theme-setting-wrapper"></div>
+      <!-- partial -->
+
+      <!-- partial:partials/_sidebar.html -->
+      <div class="sidebar sidebar-offcanvas" id="partials-sidebar-offcanvas"></div>
+      <!-- partial -->
+
+      <!-- Main Panel Starts -->
+
+      <div class="main-panel" id="mainpanel">
+        <div class="content-wrapper">
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="home-tab">
+                <div class="d-sm-flex align-items-center justify-content-between border-bottom">
+                  <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                      <a class="nav-link active ps-0" id="home-tab" data-bs-toggle="tab" href="#overview" role="tab" aria-controls="overview" aria-selected="true">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" id="profile-tab" data-bs-toggle="tab" href="#audiences" role="tab" aria-selected="false">Project Overview</a>
+                    </li>
+                      <li class="nav-item">
+                      <a class="nav-link border-0" id="logs-tab" data-bs-toggle="tab" href="#logs" role="tab" aria-selected="false">Logs
+                      </a>
+                    </li>
+                  </ul>
+                  <div>
+                    <div class="btn-wrapper">
+                      <a href="#" class="btn btn-otline-dark align-items-center"><i class="icon-share"></i> Share</a>
+                      <a href="#" class="btn btn-otline-dark"><i class="icon-printer"></i> Print</a>
+                      <a href="#" class="btn btn-primary text-white me-0"><i class="icon-download"></i> Export</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="tab-content tab-content-basic">
+                  <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview"> 
+                    <div class="row">
+                      <div class="col-sm-12" style="height:90px">
+                        <div class="statistics-details d-flex align-items-center justify-content-between">
+                        <div class="d-none d-md-block">
+                            <p class="statistics-title">Planned Progress</p>
+                            <h3 class="rate-percentage"><?php echo "40.5 %";?></h3>
+                            <p class="text-success d-flex"><i class="mdi mdi-menu-down"></i><span>This Month: 12.5%</span></p>
+                          </div>
+                        <div>
+                            <p class="statistics-title">Physical Progress</p>
+                            <h3 class="rate-percentage">32.53%</h3>
+                            <p class="text-danger d-flex"><i class="mdi mdi-menu-down"></i><span>Gap: -7.97%</span></p>
+                          </div>
+                          
+                          <div>
+                            <p class="statistics-title">Financial Progress</p>
+                            <h3 class="rate-percentage">10.15 %</h3>
+                            <p class="text-success d-flex"><i class="mdi mdi-menu-up"></i><span>+0.1%</span></p>
+                          </div>
+
+                        <div>
+                            <p class="statistics-title">Total Payment</p>
+                            <h3 class="rate-percentage"><?php echo "20.5 M";?></h3>
+                            <p class="text-success d-flex"><i class="mdi mdi-menu-down"></i><span></span></p>
+                          </div>
+                          <div class="d-none d-md-block">
+                            <p class="statistics-title">Last Payment(This Month)</p>
+                            <h3 class="rate-percentage"><?php echo "2.5 M";?></h3>
+                            <p class="text-success d-flex"><i class="mdi mdi-menu-down"></i><span></span></p>
+                          </div>
+                          <div class="d-none d-md-block">
+                            <p class="statistics-title">Last Updated</p>
+                            <h3 class="rate-percentage"><?php echo date('d, F, Y',strtotime("10-06-2019"));?> </h3>
+                            <p class="text-success d-flex"><i class="mdi mdi-menu-down"></i><span></span></p>
+                          </div>
+                          
+                                                    
+                          
+                        </div>
+                      </div>
+                    </div> 
+                    <div class="row">
+                      <div class="col-lg-8 d-flex flex-column">
+                        <div class="row flex-grow">
+                          <div class="col-12 col-lg-4 col-lg-12 grid-margin stretch-card">
+                            <div class="card card-rounded">
+                              <div class="card-body">
+                                <div class="d-sm-flex justify-content-between align-items-start">
+                                  <div>
+                                   <h4 class="card-title card-title-dash">Project Physical Progress</h4>
+                                   <h5 class="card-subtitle card-subtitle-dash">Planned Vs. Actual</h5>
+                                  </div>
+                                  <div id="performance-line-legend"></div>
+                                </div>
+                                <div class="chartjs-wrapper mt-5">
+                                  <canvas id="performaneLine"></canvas>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-lg-4 d-flex flex-column">
+                        <div class="row flex-grow">
+                        <div class="col-12 grid-margin stretch-card">
+                            <div class="card card-rounded">
+                              <div class="card-body">
+                                <div class="row">
+                                  <div class="col-lg-12">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                      <h4 class="card-title card-title-dash">Latest Project Issues</h4>
+                                     
+                                    </div>
+                                    <div class="list-wrapper">
+                                   <?php /*?> <marquee id="MARQUEE1" style="text-align: left; float: left; height: 210px;" scrollamount="4" onmouseout="this.start();" onmouseover="this.stop();" direction="up" behavior="scroll"><?php */?>
+                                      <ul class="todo-list todo-list-rounded">
+                                      <?php $swwSQL = "Select * from t012issues where iss_status<>0 order by nos_id DESC LIMIT 0,3 ";
+							 $objSDb->dbQuery($swwSQL);
+							  $issCount = $objSDb->totalRecords();
+							  if($issCount>0)
+							  {
+							  while($iss_rows= $objSDb->dbFetchArray())
+							  { ?>
+                                        <li class="d-block">
+                                          <div class="form-check w-100">
+                                            <label class="form-check-label">
+                                              <?php echo trim($iss_rows['iss_title']);?><i class="input-helper rounded"></i>
+                                            </label>
+                                            <div class="d-flex mt-2">
+                                              <div class="ps-4 text-small me-3"> <?php echo date('d, F, Y',strtotime($iss_rows['iss_date']));?></div>
+                                              <div class="badge <?php if($iss_rows['action_status']==1) 
+												  {
+													  echo 'badge-opacity-success"'; 
+												  }
+											  else { echo 'badge-opacity-warning"';
+											       }?> me-3"><?php 
+											  if($iss_rows['action_status']==1) 
+												  {
+													  echo "Resolved"; 
+												  }
+											  else { echo "Pending";
+											       }?></div>
+                                            </div>
+                                          </div>
+                                        </li> 
+                                        <?php }
+							  }?>
+                              <br/>
+                                      </ul>
+                                    <?php /*?>  </marquee><?php */?>
+                                    <div class="list align-items-right pt-3">
+                                  <div class="wrapper w-100">
+                                    <p class="mb-0">
+                                      <a href="#" class="fw-bold text-primary">Show all <i class="mdi mdi-arrow-right ms-2"></i></a>
+                                    </p>
+                                  </div>
+                                </div>
+                                    </div>
+                                    
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                     
+                        </div>
+                      </div>
+                      
+                    </div>
+                    <div class="row">
+                      <div class="col-lg-8 d-flex flex-column">
+                        <div class="row flex-grow">
+                          <div class="col-12 grid-margin stretch-card">
+                            <div class="card card-rounded">
+                              <div class="card-body">
+                                <div class="d-sm-flex justify-content-between align-items-start">
+                                  <div>
+                                    <h4 class="card-title card-title-dash">Financial Progress</h4>
+                                   <p class="card-subtitle card-subtitle-dash">Total Financial Dispursement Todate</p>
+                                  </div>
+                                  <div>
+                                    <div class="dropdown">
+                                      <button class="btn btn-secondary dropdown-toggle toggle-dark btn-lg mb-0 me-0" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> This month </button>
+                                      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+                                        <h6 class="dropdown-header">Settings</h6>
+                                        <a class="dropdown-item" href="#">Action</a>
+                                        <a class="dropdown-item" href="#">Another action</a>
+                                        <a class="dropdown-item" href="#">Something else here</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#">Separated link</a>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="d-sm-flex align-items-center mt-1 justify-content-between">
+                                  <div class="d-sm-flex align-items-center mt-4 justify-content-between"><h2 class="me-2 fw-bold">$36,2531.00</h2><h4 class="me-2">USD</h4><h4 class="text-success">(+1.37%)</h4></div>
+                                  <div class="me-3"><div id="marketing-overview-legend"></div></div>
+                                </div>
+                                <div class="chartjs-bar-wrapper mt-3">
+                                  <canvas id="marketingOverview"></canvas>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row flex-grow">
+                          <div class="col-12 grid-margin stretch-card">
+                            <div class="card card-rounded table-darkBGImg">
+                              <div class="card-body">
+                                <div class="col-sm-8">
+                                  <h3 class="text-white upgrade-info mb-0">
+                                    Latest <span class="fw-bold">News & Events on Project</span> 
+                                  </h3>
+                                  <a href="#" class="btn btn-info upgrade-btn">View All Events!</a>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                       
+                      </div>
+                      <div class="col-lg-4 d-flex flex-column">
+                            <div class="col-md-6 col-lg-12 grid-margin stretch-card">
+                            <div class="card bg-primary card-rounded">
+                              <div class="card-body pb-0">
+                                <h4 class="card-title card-title-dash text-white mb-4">Dashboard Update Status</h4>
+                                <div class="row">
+                                  <div class="col-sm-4">
+                                    <p class="status-summary-ight-white mb-1">Last Updated:</p>
+                                    <h4 style="font-size:12px; color:#FFF">10-06-2019</h4>
+                                  </div>
+                                  <div class="col-sm-8">
+                                    <div class="status-summary-chart-wrapper pb-4">
+                                      <canvas id="status-summary"></canvas>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6 col-lg-12 grid-margin stretch-card">
+                            <div class="card card-rounded">
+                              <div class="card-body">
+                                <div class="row">
+                                  <div class="col-sm-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-2 mb-sm-0">
+                                      <div class="circle-progress-width">
+                                        <div id="totalVisitors" class="progressbar-js-circle pr-2"></div>
+                                      </div>
+                                      <div>
+                                        <p class="text-small mb-2"><strong>CPI</strong></p>
+                                        <h4 class="mb-0 fw-bold">0.9</h4>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="col-sm-6">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                      <div class="circle-progress-width">
+                                        <div id="visitperday" class="progressbar-js-circle pr-2"></div>
+                                      </div>
+                                      <div>
+                                        <p class="text-small mb-2"><strong>SPI</strong></p>
+                                        <h4 class="mb-0 fw-bold">0.8</h4>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                         <div class="col-md-6 col-lg-12 grid-margin stretch-card">
+                            <div class="card card-rounded">
+                              <div class="card-body">
+                                <h4 class="card-title  card-title-dash">Recent Events</h4>
+                                <?php
+ 	$objNews->setProperty("status", "Y");
+	$objNews->setProperty("orderby", "newsdate desc");
+	$objNews->setProperty("limit", 4);
+	$objNews->lstNews();
+	$Sql = $objNews->getSQL();
+	if($objNews->totalRecords() >= 1){
+		$sno = 1;
+		while($rows = $objNews->dbFetchArray(1)){
+			
+			?>
+                                <div class="list align-items-center border-bottom py-2">
+                                  <div class="wrapper w-100">
+                                    <p class="mb-2 font-weight-medium">
+                                      <?php echo $rows['title'];?>
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                      <div class="d-flex align-items-center">
+                                        <i class="mdi mdi-calendar text-muted me-1"></i>
+                                        <p class="mb-0 text-small text-muted"><?php echo $rows['newsdate'];?></p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <?php } }?>
+                                                                <div class="list align-items-center pt-3">
+                                  <div class="wrapper w-100">
+                                    <p class="mb-0">
+                                      <a href="#" class="fw-bold text-primary">Show all <i class="mdi mdi-arrow-right ms-2"></i></a>
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div> 
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tab-pane fade show" id="audiences" role="tabpanel" aria-labelledby="audiences"> 
+                     
+                    <div class="row">
+            
+            <div class="col-md-6 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title">Project Details</h4>
+                 
+                  <div class="template-demo">
+                   <div class="chartjs-bar-wrapper mt-3">
+                                <table class="table table-striped">
+                                   <tr>
+              <td width="16%" ><strong>Project code:</strong></td>
+              <td ><?php echo $pcode; ?></td>
+        </tr>
+           <tr>
+              <td ><strong>SMEC Code:</strong></td>
+              <td ><?php echo $smec_code; ?></td>
+             </tr>
+             <tr>
+              <td  ><strong>Project Type:</strong></td>
+              <td ><?php if($ptype==1) echo "Time-Based";
+			  elseif($ptype==2) echo "Milestone"; ?></td>
+            </tr>
+           
+             <tr>
+              <td ><strong>Contract Value:</strong></td>
+              <td ><?php echo number_format($pcost,0); ?></td>
+             </tr>
+             <tr>
+              <td ><strong>Sector:</strong></td>
+              <td ><?php echo $sector_name; ?></td>
+             </tr>
+             <tr>
+              <td ><strong>Country:</strong></td>
+              <td ><?php echo $country_name; ?></td>
+             </tr>
+             <tr>
+              <td ><strong>Location:</strong></td>
+              <td ><?php echo $location; ?></td>
+             </tr>
+             
+            <?php /*?><tr>
+              <td ><strong>Project Currencies:</strong></td>
+              <td ><table class="table table-striped"><tr><td colspan="2"><?php echo "<strong>Base Currency:</strong> ".$base_cur;?></td></tr>
+              <tr><td><?php echo "<strong>Currency 1:</strong> ".$cur_1;?></td>
+              <td><?php echo "<strong>Rate:</strong> ".$cur_1_rate;?></td></tr>
+              <?php if($cur_2!="")
+			  {?>
+              <tr><td><?php echo "<strong>Currency 2:</strong> ".$cur_2;?></td>
+              <td><?php echo "<strong>Rate:</strong> ".$cur_2_rate;?></td></tr>
+              <?php }?>
+              <?php if($cur_3!="")
+			  {?>
+              <tr><td><?php echo "<strong>Currency 3:</strong> ".$cur_3;?></td>
+              <td><?php echo "<strong>Rate:</strong> ".$cur_3_rate;?></td></tr>
+              <?php }?>
+              </table></td>
+             </tr><?php */?>
+             </table>
+             
+                                </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 d-flex align-items-stretch">
+              <div class="row">
+                <div class="col-md-12 grid-margin stretch-card">
+                  <div class="card">
+                    <div class="card-body">
+                      <h4 class="card-title">Timeline</h4>
+                       <table class="table table-striped">
+                                   
+                      <tr>
+              <td ><strong>Start Date:</strong></td>
+              <td ><?php echo date("d-m-Y", strtotime($pstart)); ?></td>
+        </tr>
+			 <tr>
+              <td ><strong>End Date:</strong></td>
+              <td ><?php echo date("d-m-Y", strtotime($pend)); ?></td>
+             </tr>
+              
+             </table>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-12 grid-margin stretch-card">
+                  <div class="card">
+                    <div class="card-body">
+                      <h4 class="card-title">Stakeholders</h4>
+                     
+                      <div class="row">
+                        <div class="col-md-4 d-flex align-items-center">
+                          <div class="d-flex flex-row align-items-center">
+                            <i class="ti-package icon-lg text-warning"></i>
+                            <p class="mb-0 ms-1">
+                             Client
+                            </p>
+                          </div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-center">
+                          <div class="d-flex flex-row align-items-center">
+                            <i class="ti-package icon-md text-success"></i>
+                            <p class="mb-0 ms-1">
+                            Fundding Agency
+                            </p>
+                          </div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-center">
+                          <div class="d-flex flex-row align-items-center">
+                            <i class="ti-package icon-sm text-danger"></i>
+                            <p class="mb-0 ms-1">
+                             Consultant
+                            </p>
+                          </div>
+                        </div>
+                        <table class="table table-striped">
+                     
+              <tr>
+              <td ><strong>Client:</strong></td>
+              <td ><?php echo $client; ?></td>
+             </tr>
+               <tr>
+              <td ><strong>Consultant:</strong></td>
+              <td ><?php echo $consultant; ?></td>
+             </tr>
+             <tr>
+              <td ><strong>Funding Agency:</strong></td>
+              <td ><?php echo $funding_agency; ?></td>
+             </tr>
+             <tr>
+              <td ><strong>Contractor:</strong></td>
+              <td ><?php echo $contractor; ?></td>
+             </tr>
+             </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            
+          </div>
+                  </div>
+                  <div class="tab-pane fade show" id="logs" role="tabpanel" aria-labelledby="logs"> 
+                     
+                    <div class="row">
+            
+            <div class="col-md-6 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title">User Logs</h4>
+                 
+                  <div class="template-demo">
+                   <div class="chartjs-bar-wrapper mt-3">
+                                
+             
+                                </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 d-flex align-items-stretch">
+              <div class="row">
+                <div class="col-md-12 grid-margin stretch-card">
+                  <div class="card">
+                    <div class="card-body">
+                      <h4 class="card-title">Dashbaord Logs</h4>
+                       
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-12 grid-margin stretch-card">
+                  <div class="card">
+                    <div class="card-body">
+                      <h4 class="card-title">Project Tools Logs</h4>
+                     
+                      <div class="row">
+                        
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            
+          </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <div id="partials-footer"></div>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page -->
+  <script src="vendors/chart.js/Chart.min.js"></script>
+  <script src="vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
+  <script src="vendors/progressbar.js/progressbar.min.js"></script>
+
+  <!-- End plugin js for this page -->
+  
+  <!-- Custom js for this page-->
+  <script src="js/dashboard.js"></script>
+  <script src="js/Chart.roundedBarCharts.js"></script>
+  <!-- <script src="js/navtype_session.js"></script> -->
+  <!-- End custom js for this page-->
+
+  <script>
+      $(function(){
+        $("#partials-navbar").load("partials/_navbar.php");
+      });
+  </script>
+
+  <script>
+    $(function(){
+      $("#partials-theme-setting-wrapper").load("partials/_settings-panel.php");
+    });
+  </script>
+
+  <script>
+    $(function(){
+      $("#partials-sidebar-offcanvas").load("partials/_sidebar.php");
+    });
+</script>
+
+<script>
+  $(function(){
+    $("#partials-footer").load("partials/_footer.php");
+  });
+</script>
+
+
+
+</body>
+
+</html>
+
